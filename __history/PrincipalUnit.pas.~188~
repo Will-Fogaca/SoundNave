@@ -71,9 +71,7 @@ type
   end;
 
 var
-  // Formulário
   form_principal: Tform_principal;
-  // Variáveis de controle
   pausa: Boolean;
   movimento_fundo: Integer;
   movimento: Integer;
@@ -87,15 +85,11 @@ var
   vidas: Integer;
   invencivel: Boolean;
   tempo_de_jogo: Integer;
-  // Histórico do jogador
   hist: Historico;
-  // Fases pré-programadas
   fase01: Fase;
   fase02: Fase;
   fase03: Fase;
-  // Fase sendo executada
   fase_atual: Fase;
-  // Indicador de restauração de sessão
   restaurar: Boolean;
   completar_energia: Boolean;
 
@@ -103,13 +97,11 @@ implementation
 
 {$R *.dfm}
 
-// Utilidade para teste de pontos de checagem
 procedure depurar(ponto: Integer);
 begin
   ShowMessage('Ponto: ' + IntToStr(ponto));
 end;
 
-// Evento que dispara a inicialização do jogo
 procedure Tform_principal.FormCreate(Sender: TObject);
 begin
   restaurar := False;
@@ -117,36 +109,27 @@ begin
   inicializar_jogo();
 end;
 
-// Inicialização do jogo, suas variáveis, fases e etc.
 procedure Tform_principal.inicializar_jogo();
 begin
   // Previnindo a piscagem das imagens
   DoubleBuffered := True;
   // Configurando o intervalo de processamento do jogo
   processamento.Interval := INTERVALO_PROCESSAMENTO_MS;
-  // Inicializando histórico de jogo
   inicializar_historico();
-  // Inicializando variáveis de controle
   configurar_variaveis_de_controle();
-  // Configuração de fases pré-programadas
   configurar_fases_pre_programadas();
-  // Verifique se é preciso restaurar o jogo anterior
   if(precisa_restaurar() = True) then
   begin
-    // Antes de restaurar, indique que a energia não deve ser reposta
     completar_energia := False;
-    // Restaura sessão de acordo com o estado salvo
     restaurar_sessao();
   end;
-  // Inicializar visores
   atualizar_pontos();
   atualizar_vidas();
   atualizar_energia();
-  // Ativar temporizador de processamento do jogo
   processamento.Enabled := True;
 end;
 
-// Utilidade que inicializa os dados do histórico de jogo
+// procedure que inicializa os dados do histórico de jogo
 procedure Tform_principal.inicializar_historico();
 begin
   hist := Historico.Create();
@@ -156,7 +139,6 @@ begin
   hist.pont_pos := 0;
 end;
 
-// Provê os valores iniciais para as variáveis de controle
 procedure Tform_principal.configurar_variaveis_de_controle();
 begin
   pausa := True;
@@ -174,12 +156,9 @@ begin
   tempo_de_jogo := 0;
 end;
 
-// Configura fases pré-programas com dificuldade crescente
+
 procedure Tform_principal.configurar_fases_pre_programadas();
 begin
-  { A configuração de uma fase compreende a especificação
-    das zonas de origem dos aliens, da especificação da
-    música da fase e de sua história }
 
   // Configurando a Fase 01
   fase01 := Fase.Create;
@@ -224,7 +203,6 @@ var
   xml: String;
 begin
   xml := '';
-  // Salvando variáveis de controle
   xml := xml + envelopar_tag(TAG_CONTROLE_PAUSA, BoolToStr(pausa));
   xml := xml + envelopar_tag(TAG_CONTROLE_MOVIMENTO_FUNDO, IntToStr(movimento_fundo));
   xml := xml + envelopar_tag(TAG_CONTROLE_MOVIMENTO, IntToStr(movimento));
@@ -238,23 +216,18 @@ begin
   xml := xml + envelopar_tag(TAG_CONTROLE_VIDAS, IntToStr(vidas));
   xml := xml + envelopar_tag(TAG_CONTROLE_INVENCIVEL, BoolToStr(invencivel));
   xml := xml + envelopar_tag(TAG_CONTROLE_TEMPO_DE_JOGO, IntToStr(tempo_de_jogo));
-  // Salvando histórico de jogo
   xml := xml + envelopar_tag(TAG_HISTORICO_DATA, hist.data);
   xml := xml + envelopar_tag(TAG_HISTORICO_TEMPO, IntToStr(hist.tempo));
   xml := xml + envelopar_tag(TAG_HISTORICO_PONT_PRE, IntToStr(hist.pont_pre));
   xml := xml + envelopar_tag(TAG_HISTORICO_PONT_POS, IntToStr(hist.pont_pos));
-  // Salvando a fase atual
   xml := xml + envelopar_tag(TAG_FASE_ATUAL_CAMINHO_MUSICA, fase_atual.caminho_musica);
   xml := xml + envelopar_tag(TAG_FASE_ATUAL_HISTORIA, fase_atual.historia);
   xml := xml + envelopar_tag(TAG_FASE_ATUAL_ORIGEM_CIMA, BoolToStr(fase_atual.origem_cima));
   xml := xml + envelopar_tag(TAG_FASE_ATUAL_ORIGEM_BAIXO, BoolToStr(fase_atual.origem_baixo));
   xml := xml + envelopar_tag(TAG_FASE_ATUAL_ORIGEM_ESQUERDA, BoolToStr(fase_atual.origem_esquerda));
   xml := xml + envelopar_tag(TAG_FASE_ATUAL_ORIGEM_DIREITA, BoolToStr(fase_atual.origem_direita));
-  // Envelopando todo o estado em um recipiente
   xml := envelopar_tag(TAG_SESSAO_ESTADO, xml);
-  // Salvando o indicador de restauração
   xml := envelopar_tag(TAG_SESSAO_RESTAURAR, BoolToStr(restaurar)) + xml;
-  // Atualize o arquivo no sistema de arquivos
   escrever_no_arquivo(ARQ_DADOS_XML, xml, False);
 end;
 
@@ -297,7 +270,7 @@ begin
   tocador.Play();
 end;
 
-// Utilidade para tocar um efeito sonoro
+// procedure para tocar um efeito sonoro
 procedure Tform_principal.tocar_som(arquivo: String);
 begin
   sons.FileName := arquivo;
@@ -483,36 +456,26 @@ begin
   mover_tiros_inimigos();
 end;
 
-// Utilidade para mover a nave do jogador de forma padronizada
+// procedure para mover a nave do jogador de forma padronizada
 procedure Tform_principal.mover_nave(x, y: Integer);
 begin
-  // Mova a nave para as coordenadas especificadas
   nave.Left := x;
   nave.Top := y;
-  // Da mesma forma, mova a hitbox da nave junto a ela
   hitbox.Left := nave.Left + ((nave.Width Div 2) - (hitbox.Width) Div 2);
   hitbox.Top := nave.Top;
 end;
 
-// Utilidade que cuida das tarefas a serem realizadas quando a nave do jogador colide
+// procedure que cuida das tarefas a serem realizadas quando a nave do jogador colide
 procedure Tform_principal.morrer();
 begin
-  // Ative a invencibilidade para evitar eventuais colisões
   invencivel := True;
-  // Penalize uma vida do jogador
   Dec(vidas);
-  // Toque o som da explosão característico
   tocar_som(CAMINHO_RECURSOS + 'Explosao.mp3');
-  // Redefina o contador de energia para o máximo
   cont_energia := energia_max;
-  // Mova a nave para a posição inicial
   mover_nave(296, 290);
-  // Atualize os visores de vida e energia
   atualizar_vidas();
   atualizar_energia();
-  // Limpe os inimigos da tela para dar tempo de reação ao jogador
   limpar_inimigos();
-  // Desabilite a invencibilidade porque o cenário já está seguro
   invencivel := False;
 end;
 
@@ -522,50 +485,38 @@ var
   cont: Integer;
   temp_alien: Alien;
 begin
-  // Contador genérico
   cont := 0;
-  // Percorra os componentes do formulário
   while(cont < ComponentCount) do
   begin
-    // Se o componente considerado for um tiro dos inimigos
     if(components[cont].Tag = ID_TIRO_INIMIGO) then
     begin
-      // Simplesmente remova-os
       components[cont].Free;
-      // O vetor de componentes foi atualizado, recomece
       cont := 0;
     end;
-    // Se o componente considerado for um inimigo
     if(components[cont].Tag = ID_INIMIGO) then
     begin
-      // Inteprete o componente como um alien
       temp_alien := components[cont] as Alien;
-      // Retorne o alien para a origem na devida zona de origem
       temp_alien.voltar_pra_origem();
-      // Redefina o tempo de espera pré entrada em tela
       temp_alien.espera_pre_entrada_mod := temp_alien.espera_pre_entrada;
     end;
-    // Avance para o próximo componente
     Inc(cont);
   end;
 end;
 
-// Utilidade que trata colisões caso elas tenham acontecido
+// Tratar Colisões
 procedure Tform_principal.tratar_colisoes();
 var
   cont1: Integer;
   cont2: Integer;
 begin
-  // Contadores genéricos para percorrer o vetor de componentes do formulário
   cont1 := 0;
   cont2 := 0;
-  // Percorrer componentes (achar jogador ou tiro)
   while(cont1 < ComponentCount) do
   begin
-    // Achar jogador ou tiro
+
     if((components[cont1].Tag = ID_JOGADOR) or (components[cont1].Tag = ID_TIRO_JOGADOR)) then
     begin
-      // Percorrer componentes (achar inimigos ou seus tiros)
+
       while(cont2 < ComponentCount) do
       begin
         // Achar inimigos ou seus tiros
@@ -574,43 +525,30 @@ begin
           // Verifica colisão
           if(deu_colisao(components[cont1], components[cont2]) = True) then
           begin
-            // Jogador envolvido
             if((components[cont1].Tag = ID_JOGADOR) and (invencivel = False)) then
             begin
-              // Execute as rotinas da morte do jogador
               morrer();
             end;
-            // Tiro do jogador envolvido
             if((components[cont1].Tag = ID_TIRO_JOGADOR) and ((components[cont1] As TControl).Visible = True)) then
             begin
-              // Incremente os pontos do acerto do tiro do jogador
               Inc(pontos, 100);
-              // Atualize o visor de pontos
               atualizar_pontos();
-              // Toque o som de explosão devido à colisão
               tocar_som(CAMINHO_RECURSOS + 'Explosao.mp3');
-              // Se o componente atingido for um alien, decremente o contador de aliens
               if(components[cont2].Tag = ID_INIMIGO) then
                 Dec(cont_aliens);
-              // Desaloque o componente independente de ser alien ou tiro de alien
               components[cont2].Free();
-              // Se o componente com ID de tiro for mesmo o tiro (e não a barreira de trapaça)
               if(components[cont1].Name = 'tiro') then
               begin
-                // Desabilite as colisões deste tiro e coloque ele próximo à zona morta
                 tiro.Visible := False;
                 tiro.Top := 0;
               end;
             end;
           end;
         end;
-        // Avance para o próximo componente (inimigos e seus tiros)
         Inc(cont2);
       end;
     end;
-    // Avance para o próximo componente (jogador e seu tiro)
     Inc(cont1);
-    // Recomece a busca por inimigos e seus tiros
     cont2 := 0;
   end;
 end;
@@ -637,13 +575,10 @@ begin
     Result := False;
 end;
 
-// Utilidade que move o fundo da fase continuamente
 procedure Tform_principal.mover_fundo();
 begin
-  // Mova o fundo com velocidade de acordo com a fase
   fundo1.Top := fundo1.Top + ((movimento Div 2) * (n_fase + 1));
   fundo2.Top := fundo2.Top + ((movimento Div 2) * (n_fase + 1));
-  // Se os fundos chegarem à zona morta inferior, mova-os para a zona morta superior
   if(fundo1.Top > fundo1.Height) then
     fundo1.Top := -fundo1.Height;
   if(fundo2.Top > fundo2.Height) then
@@ -656,9 +591,7 @@ var
   cont: Integer;
   temp_alien: Alien;
 begin
-  // Contador genérico
   cont := 0;
-  // Percorra o vetor de componentes do formulário
   while(cont < ComponentCount) do
   begin
     if(components[cont].Tag = ID_INIMIGO) then

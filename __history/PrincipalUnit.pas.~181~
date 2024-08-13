@@ -637,13 +637,10 @@ begin
     Result := False;
 end;
 
-// Utilidade que move o fundo da fase continuamente
 procedure Tform_principal.mover_fundo();
 begin
-  // Mova o fundo com velocidade de acordo com a fase
   fundo1.Top := fundo1.Top + ((movimento Div 2) * (n_fase + 1));
   fundo2.Top := fundo2.Top + ((movimento Div 2) * (n_fase + 1));
-  // Se os fundos chegarem à zona morta inferior, mova-os para a zona morta superior
   if(fundo1.Top > fundo1.Height) then
     fundo1.Top := -fundo1.Height;
   if(fundo2.Top > fundo2.Height) then
@@ -656,12 +653,9 @@ var
   cont: Integer;
   temp_alien: Alien;
 begin
-  // Contador genérico
   cont := 0;
-  // Percorra o vetor de componentes do formulário
   while(cont < ComponentCount) do
   begin
-    // Caso o componente seja um alien
     if(components[cont].Tag = ID_INIMIGO) then
     begin
       temp_alien := (components[cont] As Alien);

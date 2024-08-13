@@ -550,19 +550,17 @@ begin
   end;
 end;
 
-// Utilidade que trata colisões caso elas tenham acontecido
+// Tratar Colisões
 procedure Tform_principal.tratar_colisoes();
 var
   cont1: Integer;
   cont2: Integer;
 begin
-  // Contadores genéricos para percorrer o vetor de componentes do formulário
   cont1 := 0;
   cont2 := 0;
-  // Percorrer componentes (achar jogador ou tiro)
   while(cont1 < ComponentCount) do
   begin
-    // Achar jogador ou tiro
+
     if((components[cont1].Tag = ID_JOGADOR) or (components[cont1].Tag = ID_TIRO_JOGADOR)) then
     begin
       // Percorrer componentes (achar inimigos ou seus tiros)
@@ -574,43 +572,30 @@ begin
           // Verifica colisão
           if(deu_colisao(components[cont1], components[cont2]) = True) then
           begin
-            // Jogador envolvido
             if((components[cont1].Tag = ID_JOGADOR) and (invencivel = False)) then
             begin
-              // Execute as rotinas da morte do jogador
               morrer();
             end;
-            // Tiro do jogador envolvido
             if((components[cont1].Tag = ID_TIRO_JOGADOR) and ((components[cont1] As TControl).Visible = True)) then
             begin
-              // Incremente os pontos do acerto do tiro do jogador
               Inc(pontos, 100);
-              // Atualize o visor de pontos
               atualizar_pontos();
-              // Toque o som de explosão devido à colisão
               tocar_som(CAMINHO_RECURSOS + 'Explosao.mp3');
-              // Se o componente atingido for um alien, decremente o contador de aliens
               if(components[cont2].Tag = ID_INIMIGO) then
                 Dec(cont_aliens);
-              // Desaloque o componente independente de ser alien ou tiro de alien
               components[cont2].Free();
-              // Se o componente com ID de tiro for mesmo o tiro (e não a barreira de trapaça)
               if(components[cont1].Name = 'tiro') then
               begin
-                // Desabilite as colisões deste tiro e coloque ele próximo à zona morta
                 tiro.Visible := False;
                 tiro.Top := 0;
               end;
             end;
           end;
         end;
-        // Avance para o próximo componente (inimigos e seus tiros)
         Inc(cont2);
       end;
     end;
-    // Avance para o próximo componente (jogador e seu tiro)
     Inc(cont1);
-    // Recomece a busca por inimigos e seus tiros
     cont2 := 0;
   end;
 end;
@@ -637,13 +622,10 @@ begin
     Result := False;
 end;
 
-// Utilidade que move o fundo da fase continuamente
 procedure Tform_principal.mover_fundo();
 begin
-  // Mova o fundo com velocidade de acordo com a fase
   fundo1.Top := fundo1.Top + ((movimento Div 2) * (n_fase + 1));
   fundo2.Top := fundo2.Top + ((movimento Div 2) * (n_fase + 1));
-  // Se os fundos chegarem à zona morta inferior, mova-os para a zona morta superior
   if(fundo1.Top > fundo1.Height) then
     fundo1.Top := -fundo1.Height;
   if(fundo2.Top > fundo2.Height) then
@@ -656,43 +638,34 @@ var
   cont: Integer;
   temp_alien: Alien;
 begin
-  // Contador genérico
   cont := 0;
-  // Percorra o vetor de componentes do formulário
   while(cont < ComponentCount) do
   begin
-    // Caso o componente seja um alien
     if(components[cont].Tag = ID_INIMIGO) then
     begin
-      // Trate-o como alien e mova-o de acordo com suas especificações
       temp_alien := (components[cont] As Alien);
       temp_alien.mover();
     end;
-    // Avance para o próximo componente
     Inc(cont);
   end;
 end;
 
-// Utilidade que atualiza o visor de pontos
 procedure Tform_principal.atualizar_pontos();
 begin
   pontuacao.Caption := 'Pontos: ' + IntToStr(pontos);
 end;
 
-// Utilidade que atualiza o visor de energia
 procedure Tform_principal.atualizar_energia();
 var
   cont: Integer;
   caracteres: Integer;
   limite: Integer;
 begin
-  // Extraia uma os limites de contadores para criação da barra a partir do contador de energia
   cont := 0;
   caracteres := (cont_energia * 100) Div energia_max;
   limite := 100 Div 3;
   caracteres := caracteres Div 3;
   energia.Caption := 'Energia: ';
-  // Preencha a barra de acordo com a energia disponível
   while(cont < caracteres) do
   begin
     energia.Caption := energia.Caption + '#';
@@ -703,12 +676,10 @@ begin
     energia.Caption := energia.Caption + '-';
     Inc(cont);
   end;
-  // Se a energia do jogador acabar, execute as rotinas de morte
   if(cont_energia <= 0) then
     morrer();
 end;
 
-// Utilidade para atualiza o visor de vidas do jogador
 procedure Tform_principal.atualizar_vidas();
 begin
   visor_vidas.Caption := 'x' + IntToStr(vidas);
@@ -721,14 +692,11 @@ var
   achado: Boolean;
 begin
   zona := 0;
-  // Parta do pressuposto que não achamos a zona ainda
   achado := False;
   // Enquanto não tivermos achado
   while(achado = False) do
   begin
-    // Tente uma zona aleatória
     zona := Random(4) + 1;
-    // Teste se cada zona está disposta a ser usada, se estiver, achamos nossa zona de origem
     case zona of
       ZONA_CIMA    : achado := fase_atual.origem_cima;
       ZONA_BAIXO   : achado := fase_atual.origem_baixo;
@@ -736,7 +704,6 @@ begin
       ZONA_DIREITA : achado := fase_atual.origem_direita;
     end;
   end;
-  // Dependendo da zona escolhida, atualize a posição de origem e coordenadas de movimento do alien
   case zona of
     ZONA_CIMA    : alvo.atualizar_coordenadas((Random(576) + TAMANHO_SPRITE), -(TAMANHO_SPRITE), 0, (movimento Div 2));
     ZONA_BAIXO   : alvo.atualizar_coordenadas((Random(576) + TAMANHO_SPRITE), (480 + TAMANHO_SPRITE), 0, -(movimento Div 2));
