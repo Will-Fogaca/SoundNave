@@ -1,12 +1,11 @@
 MANUAL
+SOUND NAVE - EDUVALE
+WILLIAN FOGAÇA
 ====================================
-O Planeta Nadaver está sob ataque
-de aliens e conseguiu reunir
-forças de ataque espacial para
-se defender.
-Você está nestas forças espaciais
-e deverá destruir os aliens
-e voltar para casa.
+O Planeta Sound Nave está sob ataque de aliens e conseguiu reunir
+forças de ataque espacial para se defender.
+Você está nestas forças espaciais e deverá destruir os aliens
+para voltar para casa.
 
 CONTROLES:
 W - Mover para cima
@@ -17,8 +16,8 @@ Espaço - Atirar
 P - Pausar
 
 DICAS:
-Aliens podem vir das quatro
-direções.
+
+Aliens podem vir das quatro direções.
 Alguns aliens podem vir empilhados.
 Se o indicador de vida chegar a
 zero, o jogo termina.
