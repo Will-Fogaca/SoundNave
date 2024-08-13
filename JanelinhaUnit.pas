@@ -60,7 +60,6 @@ begin
   end;
 end;
 
-// Função que muda os dados apresentados de acordo com o estado assumido pela janela
 procedure TForm2.mudar_quadro();
 begin
   dados.Clear();
@@ -71,21 +70,18 @@ begin
   end;
 end;
 
-// Muda os dados para mostrar a história da fase
 procedure TForm2.bot_historiaClick(Sender: TObject);
 begin
   estado := ESTADO_HISTORIA;
   mudar_quadro();
 end;
 
-// Muda os dados para mostrar o manual do jogo
 procedure TForm2.bot_manualClick(Sender: TObject);
 begin
   estado := ESTADO_MANUAL;
   mudar_quadro();
 end;
 
-// Muda os dados para mostrar as pontuações do jogo
 procedure TForm2.bot_pontosClick(Sender: TObject);
 begin
   estado := ESTADO_PONTUACOES;

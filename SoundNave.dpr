@@ -2,12 +2,12 @@ program SoundNave;
 
 uses
   Vcl.Forms,
-  PrincipalUnit in 'PrincipalUnit.pas' {Form1},
+  PrincipalUnit in 'PrincipalUnit.pas' {form_principal},
   JanelinhaUnit in 'JanelinhaUnit.pas' {Form2},
   AlienUnit in 'AlienUnit.pas',
   ConstantesUnit in 'ConstantesUnit.pas',
   FaseUnit in 'FaseUnit.pas',
-  RegPontuacaoUnit in 'RegPontuacaoUnit.pas' {Form3},
+  RegPontuacaoUnit in 'RegPontuacaoUnit.pas' {form_pontuacao},
   HistoricoUnit in 'HistoricoUnit.pas',
   XMLManipUnit in 'XMLManipUnit.pas',
   ArquivosUnit in 'ArquivosUnit.pas';
@@ -17,8 +17,8 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(Tform_principal, form_principal);
   Application.CreateForm(TForm2, Form2);
-  Application.CreateForm(TForm3, Form3);
+  Application.CreateForm(Tform_pontuacao, form_pontuacao);
   Application.Run;
 end.

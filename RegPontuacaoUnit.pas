@@ -8,7 +8,7 @@ uses
   ConstantesUnit, HistoricoUnit, ArquivosUnit;
 
 type
-  TForm3 = class(TForm)
+  Tform_pontuacao = class(TForm)
     bot_registrar: TButton;
     bot_cancelar: TButton;
     txt_titulo_pontuacao: TLabel;
@@ -38,7 +38,7 @@ type
   end;
 
 var
-  Form3: TForm3;
+  form_pontuacao: Tform_pontuacao;
   tocando: Boolean;
   hist: Historico;
 
@@ -47,24 +47,21 @@ implementation
 {$R *.dfm}
 
 // Fecha a janela de pontuação e o jogo
-procedure TForm3.bot_cancelarClick(Sender: TObject);
+procedure Tform_pontuacao.bot_cancelarClick(Sender: TObject);
 begin
   Close();
 end;
 
 // Registra o histórico do jogador no arquivo de pontuações
-procedure TForm3.bot_registrarClick(Sender: TObject);
+procedure Tform_pontuacao.bot_registrarClick(Sender: TObject);
 var
   conteudo, nome, prefixo_tab: String;
 begin
-  // Configure o prefixo da linha de dados do jogador
   prefixo_tab := '>>>> ';
-  // Se o arquivo de pontuações não existir, crie-o
   if(FileExists(ARQ_PONTUACOES) = False) then
   begin
     escrever_no_arquivo(ARQ_PONTUACOES, CABECALHO_ARQ_PONT, False);
   end;
-  // Se um nome não for informado, dê como "jogador desconhecido"
   if(Length(nome_jogador.Text) > 1) then
     nome := nome_jogador.Text
   else
@@ -81,7 +78,7 @@ begin
 end;
 
 // Configura o formulário assim que ele aparecer
-procedure TForm3.FormShow(Sender: TObject);
+procedure Tform_pontuacao.FormShow(Sender: TObject);
 begin
   DoubleBuffered := True;
   acompanhante := 0;
@@ -89,7 +86,7 @@ begin
 end;
 
 // Formate os dados do histórico do jogador no formulário
-procedure TForm3.formatar_dados();
+procedure Tform_pontuacao.formatar_dados();
 begin
   data_tempo.Caption := 'Data: ' + hist.data + ' | Tempo de jogo: ' + IntToStr(hist.tempo) + ' segundos';
   pont_prepos.Caption := IntToStr(hist.pont_pre) + ' / ' + IntToStr(hist.pont_pos);
@@ -97,7 +94,7 @@ begin
 end;
 
 // Permite o recebimento do histórico do jogador por outro formulário
-procedure TForm3.informar_historico(hist1: Historico);
+procedure Tform_pontuacao.informar_historico(hist1: Historico);
 begin
   hist := hist1;
   formatar_dados();
@@ -105,7 +102,7 @@ begin
 end;
 
 // Toca o som da contagem de pontos
-procedure TForm3.tocar_som();
+procedure Tform_pontuacao.tocar_som();
 begin
   // Se não estiver tocando
   if(tocando = False) then
@@ -124,13 +121,13 @@ begin
 end;
 
 // Garante o replay do toque de pontuação
-procedure TForm3.t_somTimer(Sender: TObject);
+procedure Tform_pontuacao.t_somTimer(Sender: TObject);
 begin
   som.Play();
 end;
 
 // Para o som e o temporizador de replay, e desbloqueia outros toques
-procedure TForm3.parar_som();
+procedure Tform_pontuacao.parar_som();
 begin
   t_som.Enabled := False;
   som.Stop;
@@ -138,7 +135,7 @@ begin
 end;
 
 // Realiza a contagem dos pontos interativa
-procedure TForm3.temporizadorTimer(Sender: TObject);
+procedure Tform_pontuacao.temporizadorTimer(Sender: TObject);
 begin
   // Toque o som da contagem
   tocar_som();

@@ -8,9 +8,8 @@ uses
   Vcl.StdCtrls, Vcl.MPlayer,
   ConstantesUnit, XMLManipUnit, ArquivosUnit, FaseUnit, AlienUnit, JanelinhaUnit, RegPontuacaoUnit, HistoricoUnit;
 
-// Formulário Principal do Jogo
 type
-  TForm1 = class(TForm)
+  Tform_principal = class(TForm)
     painel: TPanel;
     nave: TImage;
     processamento: TTimer;
@@ -73,7 +72,7 @@ type
 
 var
   // Formulário
-  Form1: TForm1;
+  form_principal: Tform_principal;
   // Variáveis de controle
   pausa: Boolean;
   movimento_fundo: Integer;
@@ -111,7 +110,7 @@ begin
 end;
 
 // Evento que dispara a inicialização do jogo
-procedure TForm1.FormCreate(Sender: TObject);
+procedure Tform_principal.FormCreate(Sender: TObject);
 begin
   restaurar := False;
   completar_energia := True;
@@ -119,7 +118,7 @@ begin
 end;
 
 // Inicialização do jogo, suas variáveis, fases e etc.
-procedure TForm1.inicializar_jogo();
+procedure Tform_principal.inicializar_jogo();
 begin
   // Previnindo a piscagem das imagens
   DoubleBuffered := True;
@@ -148,7 +147,7 @@ begin
 end;
 
 // Utilidade que inicializa os dados do histórico de jogo
-procedure TForm1.inicializar_historico();
+procedure Tform_principal.inicializar_historico();
 begin
   hist := Historico.Create();
   hist.data := '';
@@ -158,7 +157,7 @@ begin
 end;
 
 // Provê os valores iniciais para as variáveis de controle
-procedure TForm1.configurar_variaveis_de_controle();
+procedure Tform_principal.configurar_variaveis_de_controle();
 begin
   pausa := True;
   movimento_fundo := 1;
@@ -176,7 +175,7 @@ begin
 end;
 
 // Configura fases pré-programas com dificuldade crescente
-procedure TForm1.configurar_fases_pre_programadas();
+procedure Tform_principal.configurar_fases_pre_programadas();
 begin
   { A configuração de uma fase compreende a especificação
     das zonas de origem dos aliens, da especificação da
@@ -220,7 +219,7 @@ begin
 end;
 
 // Salva o estado do jogo em um formato XML
-procedure TForm1.salvar_estado();
+procedure Tform_principal.salvar_estado();
 var
   xml: String;
 begin
@@ -259,8 +258,7 @@ begin
   escrever_no_arquivo(ARQ_DADOS_XML, xml, False);
 end;
 
-// Utilidade que indica a imagem usada pelos aliens de acordo com a fase a ser jogada
-function TForm1.icone_alien_por_fase(): String;
+function Tform_principal.icone_alien_por_fase(): String;
 begin
   if(n_fase = 1) then
     Result := 'alien1.png';
@@ -270,60 +268,49 @@ begin
     Result := 'alien3.png';
 end;
 
-// Utilidade para criar/alocar, configurar e disponibilizar um alien para uso
-function TForm1.criar_alien(): Alien;
+function Tform_principal.criar_alien(): Alien;
 var
   temp_alien: Alien;
 begin
-  // Alien criado/alocado
-  temp_alien := Alien.Create(Form1);
-  // Alien disponibilizado na tela
-  temp_alien.Parent := Form1;
-  // Configurando alien
+  temp_alien := Alien.Create(form_principal);
+  temp_alien.Parent := form_principal;
   temp_alien.Width := TAMANHO_SPRITE;
   temp_alien.Height := TAMANHO_SPRITE;
-  temp_alien.Left := Form1.Width - temp_alien.Width;
+  temp_alien.Left := form_principal.Width - temp_alien.Width;
   temp_alien.Top := 0;
   temp_alien.Tag := ID_INIMIGO;
   temp_alien.Picture.LoadFromFile(CAMINHO_RECURSOS + icone_alien_por_fase());
   temp_alien.espera_pre_entrada := (1000 Div INTERVALO_PROCESSAMENTO_MS) * (Random(10) + 1);
   temp_alien.espera_pre_entrada_mod := temp_alien.espera_pre_entrada;
   temp_alien.ja_atirou := True;
-  // Disponibilizando alien para uso
   Result := temp_alien;
 end;
 
-// Utilidade que contabiliza o tempo de jogo do jogador
-procedure TForm1.cronometroTimer(Sender: TObject);
+procedure Tform_principal.cronometroTimer(Sender: TObject);
 begin
-  // Contabilize o tempo apenas se o jogo estiver correndo
   if(pausa = False) then
     Inc(tempo_de_jogo);
 end;
 
-// Utilidade para replay automático de música
-procedure TForm1.ctrl_tocadorTimer(Sender: TObject);
+procedure Tform_principal.ctrl_tocadorTimer(Sender: TObject);
 begin
   tocador.Play();
 end;
 
 // Utilidade para tocar um efeito sonoro
-procedure TForm1.tocar_som(arquivo: String);
+procedure Tform_principal.tocar_som(arquivo: String);
 begin
   sons.FileName := arquivo;
   sons.Open();
   sons.Play();
 end;
 
-// Evento que dispara o processamento de teclas pressionadas e suas ações
-procedure TForm1.FormKeyPress(Sender: TObject; var Key: Char);
+procedure Tform_principal.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  // (Des)Pausar
   if(Key = 'p') then
   begin
     pausa := not pausa;
   end;
-  // Controles permitidos apenas em jogo despausado
   if(pausa = False) then
   begin
     // Controles permitidos apenas em modo avançado (após a terceira fase)
@@ -378,61 +365,42 @@ begin
   end;
 end;
 
-// Utilidade que aciona o processamento de um tiro
-procedure TForm1.atirar();
+procedure Tform_principal.atirar();
 begin
-  // Se um tiro já tiver sido lançado e seu processamento não tiver acabado, não permita um novo lançamento
   if(tiro_lancado = False) then
   begin
-    // Se o tiro não tiver sido lançado, marque-o como lançado
     tiro_lancado := True;
-    // Toque o efeito sonoro característico do tiro
     tocar_som(CAMINHO_RECURSOS + 'Tiro.mp3');
-    // Configure seu posicionamento de acordo com a nave
     tiro.Left := (nave.Left + (nave.Width div 2));
     tiro.Top := nave.Top;
-    // Habilite a visibilidade do tiro (habilitando-o para colisões)
     tiro.Visible := True;
-    // O processamento do tiro é cuidado por outra utilidade
   end;
 end;
 
-// Utilidade que processa o tiro do jogador assim que ele é marcado como lançado
-procedure TForm1.tratar_tiro_jogador();
+procedure Tform_principal.tratar_tiro_jogador();
 begin
-  // Se o tiro estiver marcado como lançado
   if(tiro_lancado = True) then
   begin
-    // Movimente o tiro para cima constantemente
     tiro.Top := tiro.Top - movimento;
-    // Mova o tiro horizontalmente de acordo com a nave (caracteristica do Megamania/Atack original)
     Tiro.Left := (nave.Left + (nave.Width div 2));
-    // Verifique se o tiro chegou à zona morta designada
     if(tiro.Top < -(tiro.Height)) then
     begin
-      // Desative a variável de controle de tiro lançado e torne-o invisível (desabilita colisões)
       tiro_lancado := False;
       tiro.Visible := False;
     end;
   end;
 end;
 
-// Utilidade que escolhe um alien aleatório dentre os alocados para a fase
-function TForm1.escolher_alien_aleatorio(quant_aliens: Integer): Integer;
+function Tform_principal.escolher_alien_aleatorio(quant_aliens: Integer): Integer;
 var
   indice: Integer;
   cont: Integer;
 begin
-  // Parta do princípio que o alien pode não ser encontrado
   Result := -1;
-  // Indique um alien aleatório dentre a quantidade de aliens disponíveis
   indice := Random(quant_aliens) + 1;
-  // Prepare-se para percorrer os aliens disponíveis
   cont := 0;
-  // Se tiver algum alien disponível
   if(quant_aliens > 0) then
   begin
-    // Enquanto não chegarmos no índice indicado
     while(indice > 0) do
     begin
       // Percorra todos os componentes do formulário
@@ -444,70 +412,55 @@ begin
         // Se o índice chegou a zero, este é o alien aleatório que buscamos
         if(indice = 0) then
         begin
-          // Indique este índice de componente do formulário como o alien aleatório que queremos
           Result := cont;
-          // Quebre o laço
           break;
         end;
-        // Se ainda não encontramos o alien, passe para o próximo componente do formulário
+
         Inc(cont);
       end;
-      // Redefina o contador de componentes (para percorrer os componentes do formulário novamente)
+
       cont := 0;
     end;
   end;
-  // Se, pra início de conversa, não tínhamos um alien, o índice de componente já está como -1
+
 end;
 
-// Conta quantos tiros inimigos foram lançados pelos aliens
-function TForm1.contar_tiros_inimigos(): Integer;
+
+function Tform_principal.contar_tiros_inimigos(): Integer;
 var
   cont: Integer;
 begin
-  // Inicialize o contador para percorrer os componentes do formulário
   cont := 0;
-  // Parta do princípio que nenhum tiro inimigo foi disparado
   Result := 0;
-  // Percorra os componentes do formulário
   while(cont < ComponentCount) do
   begin
-    // Se encontrarmos um tiro, incremente o contador de tiros
     if(components[cont].Tag = ID_TIRO_INIMIGO) then
       Inc(Result);
-    // Avance para o próximo componente
     Inc(cont);
   end;
 end;
 
-// Utilidade que move os tiros de inimigos lançados
-procedure TForm1.mover_tiros_inimigos();
+procedure Tform_principal.mover_tiros_inimigos();
 var
   cont: Integer;
   temp_tiro: TControl;
 begin
-  // Contador para percorrer os componentes do formulário
   cont := 0;
-  // Percorra os componentes do formulário
   while(cont < ComponentCount) do
   begin
-    // Se o componente considerado for um tiro
     if(components[cont].Tag = ID_TIRO_INIMIGO) then
     begin
-      // Converta-o para o tipo de componente adequado
       temp_tiro := components[cont] As TControl;
-      // Mova o tiro pela tela
       temp_tiro.Top := temp_tiro.Top + movimento + (movimento Div 3);
-      // Se o tiro chegar na zona morta designada, desaloque-o
       if(temp_tiro.Top > temp_tiro.Parent.Height) then
         temp_tiro.Free();
     end;
-    // Avance para o próximo componente
     Inc(cont);
   end;
 end;
 
 // Utilidade que cria, move e deleta tiros inimigos
-procedure TForm1.tratar_tiros_inimigos();
+procedure Tform_principal.tratar_tiros_inimigos();
 var
   temp_alien: Alien;
   indice: Integer;
@@ -531,7 +484,7 @@ begin
 end;
 
 // Utilidade para mover a nave do jogador de forma padronizada
-procedure TForm1.mover_nave(x, y: Integer);
+procedure Tform_principal.mover_nave(x, y: Integer);
 begin
   // Mova a nave para as coordenadas especificadas
   nave.Left := x;
@@ -542,7 +495,7 @@ begin
 end;
 
 // Utilidade que cuida das tarefas a serem realizadas quando a nave do jogador colide
-procedure TForm1.morrer();
+procedure Tform_principal.morrer();
 begin
   // Ative a invencibilidade para evitar eventuais colisões
   invencivel := True;
@@ -564,7 +517,7 @@ begin
 end;
 
 // Remove os inimigos da parte visível da tela de forma a dar tempo de reação ao jogador
-procedure TForm1.limpar_inimigos();
+procedure Tform_principal.limpar_inimigos();
 var
   cont: Integer;
   temp_alien: Alien;
@@ -598,7 +551,7 @@ begin
 end;
 
 // Utilidade que trata colisões caso elas tenham acontecido
-procedure TForm1.tratar_colisoes();
+procedure Tform_principal.tratar_colisoes();
 var
   cont1: Integer;
   cont2: Integer;
@@ -663,7 +616,7 @@ begin
 end;
 
 // Utilidade que testa de várias formas se houve uma colisão entre dois componentes
-function TForm1.deu_colisao(a, b: TComponent): Boolean;
+function Tform_principal.deu_colisao(a, b: TComponent): Boolean;
 var
   ac, bc: TControl;
 begin
@@ -675,7 +628,7 @@ begin
 end;
 
 // Utilidade que detecta uma colisão
-function TForm1.testar_colisao(a, b: TControl): Boolean;
+function Tform_principal.testar_colisao(a, b: TControl): Boolean;
 begin
   // Teste se houve uma colisão ou não e retorne o resultado lógico
   if((a.Left < (b.Left + b.Width)) and ((a.Left + a.Width) > b.Left) and (a.Top < (b.Top + b.Height)) and ((a.Top + a.Height) > b.Top)) then
@@ -684,13 +637,10 @@ begin
     Result := False;
 end;
 
-// Utilidade que move o fundo da fase continuamente
-procedure TForm1.mover_fundo();
+procedure Tform_principal.mover_fundo();
 begin
-  // Mova o fundo com velocidade de acordo com a fase
   fundo1.Top := fundo1.Top + ((movimento Div 2) * (n_fase + 1));
   fundo2.Top := fundo2.Top + ((movimento Div 2) * (n_fase + 1));
-  // Se os fundos chegarem à zona morta inferior, mova-os para a zona morta superior
   if(fundo1.Top > fundo1.Height) then
     fundo1.Top := -fundo1.Height;
   if(fundo2.Top > fundo2.Height) then
@@ -698,48 +648,39 @@ begin
 end;
 
 // Utilidade que move os inimigos pela tela
-procedure TForm1.mover_inimigos();
+procedure Tform_principal.mover_inimigos();
 var
   cont: Integer;
   temp_alien: Alien;
 begin
-  // Contador genérico
   cont := 0;
-  // Percorra o vetor de componentes do formulário
   while(cont < ComponentCount) do
   begin
-    // Caso o componente seja um alien
     if(components[cont].Tag = ID_INIMIGO) then
     begin
-      // Trate-o como alien e mova-o de acordo com suas especificações
       temp_alien := (components[cont] As Alien);
       temp_alien.mover();
     end;
-    // Avance para o próximo componente
     Inc(cont);
   end;
 end;
 
-// Utilidade que atualiza o visor de pontos
-procedure TForm1.atualizar_pontos();
+procedure Tform_principal.atualizar_pontos();
 begin
   pontuacao.Caption := 'Pontos: ' + IntToStr(pontos);
 end;
 
-// Utilidade que atualiza o visor de energia
-procedure TForm1.atualizar_energia();
+procedure Tform_principal.atualizar_energia();
 var
   cont: Integer;
   caracteres: Integer;
   limite: Integer;
 begin
-  // Extraia uma os limites de contadores para criação da barra a partir do contador de energia
   cont := 0;
   caracteres := (cont_energia * 100) Div energia_max;
   limite := 100 Div 3;
   caracteres := caracteres Div 3;
   energia.Caption := 'Energia: ';
-  // Preencha a barra de acordo com a energia disponível
   while(cont < caracteres) do
   begin
     energia.Caption := energia.Caption + '#';
@@ -750,32 +691,27 @@ begin
     energia.Caption := energia.Caption + '-';
     Inc(cont);
   end;
-  // Se a energia do jogador acabar, execute as rotinas de morte
   if(cont_energia <= 0) then
     morrer();
 end;
 
-// Utilidade para atualiza o visor de vidas do jogador
-procedure TForm1.atualizar_vidas();
+procedure Tform_principal.atualizar_vidas();
 begin
   visor_vidas.Caption := 'x' + IntToStr(vidas);
 end;
 
 // Definir as posições de origem e movimentação de um alien de acordo com as zonas de origem da fase atual
-procedure TForm1.definir_posicoes_do_alien(var alvo: Alien);
+procedure Tform_principal.definir_posicoes_do_alien(var alvo: Alien);
 var
   zona: Integer;
   achado: Boolean;
 begin
   zona := 0;
-  // Parta do pressuposto que não achamos a zona ainda
   achado := False;
   // Enquanto não tivermos achado
   while(achado = False) do
   begin
-    // Tente uma zona aleatória
     zona := Random(4) + 1;
-    // Teste se cada zona está disposta a ser usada, se estiver, achamos nossa zona de origem
     case zona of
       ZONA_CIMA    : achado := fase_atual.origem_cima;
       ZONA_BAIXO   : achado := fase_atual.origem_baixo;
@@ -783,7 +719,6 @@ begin
       ZONA_DIREITA : achado := fase_atual.origem_direita;
     end;
   end;
-  // Dependendo da zona escolhida, atualize a posição de origem e coordenadas de movimento do alien
   case zona of
     ZONA_CIMA    : alvo.atualizar_coordenadas((Random(576) + TAMANHO_SPRITE), -(TAMANHO_SPRITE), 0, (movimento Div 2));
     ZONA_BAIXO   : alvo.atualizar_coordenadas((Random(576) + TAMANHO_SPRITE), (480 + TAMANHO_SPRITE), 0, -(movimento Div 2));
@@ -792,68 +727,51 @@ begin
   end;
 end;
 
-// Utilidade que prepara a fase para ser jogada
-procedure TForm1.preparar_fase();
+// Preparar fase
+procedure Tform_principal.preparar_fase();
 var
   cont: Integer;
   temp_alien: Alien;
 begin
-  // Contador genérico
   cont := 0;
-  // Crie todos os aliens necessários ao funcionamento da fase
   while(cont < cont_aliens) do
   begin
-    // Crie um alein, defina suas posições e coloque-o na origem
     temp_alien := criar_alien();
     definir_posicoes_do_alien(temp_alien);
     temp_alien.voltar_pra_origem();
-    // Parta para o próximo alien
     Inc(cont);
   end;
-  // Restaurar energia apenas se o jogo não estiver sendo restaurado
   if(completar_energia = True) then
   begin
-    // Defina uma quantidade de energia máximo da acordo com a fase
     energia_max := (1000 Div INTERVALO_PROCESSAMENTO_MS) * 60 * (n_fase + 1);
-    // Redefina o contador de energia para o máximo
     cont_energia := energia_max;
   end;
   completar_energia := True;
-  // Especifique o limite do número de tiros inimigos permitidos de acordo com a fase
   limite_tiros_inimigos := (FATOR_N_ALIENS * n_fase) Div 5;
-  // Toque a música da fase
   tocar_musica(CAMINHO_RECURSOS + fase_atual.caminho_musica);
 end;
 
-// Utilidade para tocar a música de uma fase
-procedure TForm1.tocar_musica(arquivo: String);
+// Tocar música da fase;
+procedure Tform_principal.tocar_musica(arquivo: String);
 begin
-  // Especifique o nome do arquivo a ser tocado e abra-o
   tocador.FileName := arquivo;
   tocador.Open();
-  // Especifique o formato de tempo do tocador como sendo milissegundos
   tocador.TimeFormat := tfMilliseconds;
-  // Defina o intervalo do temporizador como a duração da música mais 100 milissegundos
   ctrl_tocador.Interval := tocador.Length + 100;
-  // Toque a música
   tocador.Play();
-  // Ative o temporizador (para garantir o replay infinito)
   ctrl_tocador.Enabled := True;
 end;
 
-// Utilidade que cuida das rotinas do avanço de fases
-procedure TForm1.avancar_fase();
+// Avanço de fases
+procedure Tform_principal.avancar_fase();
 begin
-  // Contabilize a fase avançada
   Inc(n_fase);
-  // Estabeleça o número de aliens a ser alocados para esta fase de acordo com seu número e o fator de aliens
   cont_aliens := (n_fase * FATOR_N_ALIENS);
-  // Caso o número da fase seja um número de um a três, carregue as fases pré-programadas
+
   case n_fase of
     1: fase_atual := fase01;
     2: fase_atual := fase02;
     3: fase_atual := fase03;
-  // Caso o número da fase seja um número maior que três, crie uma fase com o nível máximo de dificuldade, história e música próprias
   else
     fase_atual.origem_cima := True;
     fase_atual.origem_baixo := True;
@@ -862,14 +780,12 @@ begin
     fase_atual.caminho_musica := 'Triac - Eat Your Bricks.mp3';
     fase_atual.historia := 'COMUNICADO: Você venceu a guerra, agora retorne para casa são e salvo.';
   end;
-  // Prepare a fase para ser jogada
   preparar_fase();
-  // Pause o programa inteiro por um segundo
   Sleep(1000);
 end;
 
-// Utilidade que registra os dados do histórico da sessão de jogo
-procedure TForm1.registrar_historico();
+//Gravar estado da sessão.
+procedure Tform_principal.registrar_historico();
 begin
   if((n_fase < 4) and (n_fase > 0)) then
     hist.pont_pre := pontos
@@ -880,7 +796,7 @@ begin
 end;
 
 // Verifica se o jogo foi abortado na sessão anterior
-function TForm1.precisa_restaurar(): Boolean;
+function Tform_principal.precisa_restaurar(): Boolean;
 var
   xml: String;
 begin
@@ -895,16 +811,13 @@ begin
 end;
 
 // Restaura a sessão do jogo de acordo com o estado salvo
-procedure TForm1.restaurar_sessao();
+procedure Tform_principal.restaurar_sessao();
 var
   xml: String;
 begin
-  // Consiga os dados do arquivo XML
   xml := ler_do_arquivo(ARQ_DADOS_XML);
-  // Verifique se o conteúdo é válido
   if(Length(xml) > 0) then
   begin
-    // Restaure as variáveis de controle
     pausa := StrToBool(extrair_valor_tag(xml, TAG_CONTROLE_PAUSA));
     movimento_fundo := StrToInt(extrair_valor_tag(xml, TAG_CONTROLE_MOVIMENTO_FUNDO));
     movimento := StrToInt(extrair_valor_tag(xml, TAG_CONTROLE_MOVIMENTO));
@@ -918,94 +831,65 @@ begin
     vidas := StrToInt(extrair_valor_tag(xml, TAG_CONTROLE_VIDAS));
     invencivel := StrToBool(extrair_valor_tag(xml, TAG_CONTROLE_INVENCIVEL));
     tempo_de_jogo := StrToInt(extrair_valor_tag(xml, TAG_CONTROLE_TEMPO_DE_JOGO));
-    // Restaure os dados do histórico
     hist.data := extrair_valor_tag(xml, TAG_HISTORICO_DATA);
     hist.tempo := StrToInt(extrair_valor_tag(xml, TAG_HISTORICO_TEMPO));
     hist.pont_pre := StrToInt(extrair_valor_tag(xml, TAG_HISTORICO_PONT_PRE));
     hist.pont_pos := StrToInt(extrair_valor_tag(xml, TAG_HISTORICO_PONT_POS));
-    // Restaure os dados da fase em andamento
     fase_atual.caminho_musica := extrair_valor_tag(xml, TAG_FASE_ATUAL_CAMINHO_MUSICA);
     fase_atual.historia := extrair_valor_tag(xml, TAG_FASE_ATUAL_HISTORIA);
     fase_atual.origem_cima := StrToBool(extrair_valor_tag(xml, TAG_FASE_ATUAL_ORIGEM_CIMA));
     fase_atual.origem_baixo := StrToBool(extrair_valor_tag(xml, TAG_FASE_ATUAL_ORIGEM_BAIXO));
     fase_atual.origem_esquerda := StrToBool(extrair_valor_tag(xml, TAG_FASE_ATUAL_ORIGEM_ESQUERDA));
     fase_atual.origem_direita := StrToBool(extrair_valor_tag(xml, TAG_FASE_ATUAL_ORIGEM_DIREITA));
-    // Prepare a fase para que o jogador já entre pronto para a ação
     preparar_fase();
   end
-  else // Se o XML não for válido, informe um erro
+  else
     ShowMessage('Erro! Dados do estado inválidos! (XML)');
 end;
 
-// Evento que dispara todo o processamento do jogo
-procedure TForm1.processamentoTimer(Sender: TObject);
+procedure Tform_principal.processamentoTimer(Sender: TObject);
 begin
-  // Se o jogo estiver pausado, não lance estas rotinas
   if(pausa = False) then
   begin
-    // Se o jogo estiver correndo, indique uma pausa para bloquear essas rotinas para outras possíveis threads
     pausa := True;
-    // Realize o processamento padrão de cada ciclo
     tratar_colisoes();
     mover_fundo();
     mover_inimigos();
     tratar_tiro_jogador();
     tratar_tiros_inimigos();
-    // Desconte a energia do ciclo
     Dec(cont_energia);
-    // Atualize o visor de energia
     atualizar_energia();
-    // O jogo está em pleno funcionamento, indique que restauração é necessária
     restaurar := True;
-    // Indique o jogo como despausado ao fim do processamento
     pausa := False;
   end;
-  // Se o contador de aliens da fase for ou chegar a zero
+
   if(cont_aliens <= 0) then
   begin
-    // Bloqueie essas rotinas
     processamento.Enabled := False;
-    // Se o jogo já estiver no meio da sessão
     if(n_fase > 0) then
     begin
-      // Ao início de cada fase, converta a energia que sobrou na anterior em pontos
       Inc(pontos, (cont_energia - ((cont_energia Mod 10) * 10)));
-      // Atualize o visor de pontos
       atualizar_pontos();
     end;
-    // Registre o histórico de jogabilidade básica (requisito do trabalho)
     registrar_historico();
-    // Avance a fase pois o jogador destruiu todos os aliens ou nenhum alien foi alocao ainda
     avancar_fase();
-    // Passe os dados da fase atual à janela de informações
     Form2.informar_fase(fase_atual);
-    // Mostre a tela de informações e previna a continuação do jogo enquanto ela não for fechada
     Form2.ShowModal();
-    // Reabilite a execução do processamento do jogo
     processamento.Enabled := True;
-    // Caso tenha sido pausado nas rotinas, indique o jogo como despausado
     pausa := False;
   end;
-  // Caso as vidas do jogador acabem
   if(vidas <= 0) then
   begin
-    // Bloqueie o processamento do jogo
     processamento.Enabled := False;
-    // Registre o histórico do jogador
     registrar_historico();
-    // Informe o histórico do jogador à janela de finalização
-    Form3.informar_historico(hist);
-    // Mostre a janela de forma restritiva
-    Form3.ShowModal();
-    // Feche o jogo depois da finalização
+    form_pontuacao.informar_historico(hist);
+    form_pontuacao.ShowModal();
     fechar_jogo();
   end;
-  // Salve o estado do jogo
   salvar_estado();
 end;
 
-// Fecha o jogo seguindo um procedimento padrão
-procedure TForm1.fechar_jogo();
+procedure Tform_principal.fechar_jogo();
 begin
   restaurar := False;
   salvar_estado();
