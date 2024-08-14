@@ -1,3 +1,10 @@
 PONTUAÇÕES
 ==========================
 
+Jogador Desconhecido:
+>>>> 1900 pontos.
+>>>> 1900 pontos antes da terceira fase.
+>>>> 0 pontos depois da terceira fase.
+>>>> Data do jogo: 13/08/2024
+>>>> Tempo de jogo: 100 segundos
+

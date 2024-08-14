@@ -4,8 +4,8 @@ object form_principal: Tform_principal
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Sound Nave'
-  ClientHeight = 452
-  ClientWidth = 634
+  ClientHeight = 480
+  ClientWidth = 638
   Color = clBlack
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -2011,12 +2011,19 @@ object form_principal: Tform_principal
   object ctrl_tocador: TTimer
     Enabled = False
     OnTimer = ctrl_tocadorTimer
-    Left = 32
-    Top = 8
+    Left = 192
+    Top = 48
   end
   object cronometro: TTimer
     OnTimer = cronometroTimer
-    Left = 56
-    Top = 8
+    Left = 88
+    Top = 16
+  end
+  object tmr_aviso_colisao: TTimer
+    Enabled = False
+    Interval = 4000
+    OnTimer = tmr_aviso_colisaoTimer
+    Left = 288
+    Top = 24
   end
 end

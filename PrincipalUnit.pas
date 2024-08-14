@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Imaging.pngimage,
   Vcl.StdCtrls, Vcl.MPlayer,
-  ConstantesUnit, XMLManipUnit, ArquivosUnit, FaseUnit, AlienUnit, JanelinhaUnit, RegPontuacaoUnit, HistoricoUnit;
+  ConstantesUnit, XMLManipUnit, ArquivosUnit, FaseUnit, AlienUnit, JanelinhaUnit, RegPontuacaoUnit, HistoricoUnit,
+  Winapi.ActiveX, MMSystem;
 
 type
   Tform_principal = class(TForm)
@@ -26,11 +27,13 @@ type
     hitbox: TPanel;
     barreira: TPanel;
     cronometro: TTimer;
+    tmr_aviso_colisao: TTimer;
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormCreate(Sender: TObject);
     procedure processamentoTimer(Sender: TObject);
     procedure ctrl_tocadorTimer(Sender: TObject);
     procedure cronometroTimer(Sender: TObject);
+    procedure tmr_aviso_colisaoTimer(Sender: TObject);
   private
     function criar_alien: Alien;
     procedure atirar;
@@ -38,6 +41,8 @@ type
     procedure tratar_colisoes;
     function deu_colisao(a, b: TComponent): Boolean;
     function testar_colisao(a, b: TControl): Boolean;
+    function  calcular_direcao_segura(Jogador: TControl): TPointF;
+    procedure emitir_ordem_direcao(Jogador: TControl);
     procedure mover_fundo;
     procedure mover_inimigos;
     procedure atualizar_pontos;
@@ -92,8 +97,12 @@ var
   fase_atual: Fase;
   restaurar: Boolean;
   completar_energia: Boolean;
+  fl_aviso_emitido:Boolean;
 
 implementation
+
+uses
+  System.Types;
 
 {$R *.dfm}
 
@@ -155,6 +164,52 @@ begin
   invencivel := False;
   tempo_de_jogo := 0;
 end;
+
+
+function Tform_principal.calcular_direcao_segura(Jogador: TControl): TPointF;
+var
+  i: Integer;
+  vetor_afastamento, direcao_segura: TPointF;
+  distancia, distanciaY: Single;
+begin
+  direcao_segura := PointF(0, 0);
+  for i := 0 to ComponentCount - 1 do
+  begin
+    if (Components[i].Tag = ID_INIMIGO) or (Components[i].Tag = ID_TIRO_INIMIGO) then
+    begin
+      // Calcular vetor de afastamento
+      vetor_afastamento.X := Jogador.Left - (Components[i] as TControl).Left;
+      vetor_afastamento.Y := Jogador.Top - (Components[i] as TControl).Top;
+
+      // Verificar proximidade no eixo Y para evitar cálculo de direção em eixo irrelevante
+      distanciaY := Abs(vetor_afastamento.Y);
+      if distanciaY > 100 then  // Ajuste o valor conforme necessário
+        Continue;
+
+      // Calcular a distância para normalizar o vetor
+      distancia := sqrt(sqr(vetor_afastamento.X) + sqr(vetor_afastamento.Y));
+      if distancia <> 0 then
+      begin
+        vetor_afastamento.X := vetor_afastamento.X / distancia;
+        vetor_afastamento.Y := vetor_afastamento.Y / distancia;
+      end;
+
+      // Somar o vetor de afastamento à direção segura
+      direcao_segura.X := direcao_segura.X + vetor_afastamento.X;
+      direcao_segura.Y := direcao_segura.Y + vetor_afastamento.Y;
+    end;
+  end;
+
+  // Normalizar a direção segura
+  distancia := sqrt(sqr(direcao_segura.X) + sqr(direcao_segura.Y));
+  if distancia <> 0 then
+  begin
+    direcao_segura.X := direcao_segura.X / distancia;
+    direcao_segura.Y := direcao_segura.Y / distancia;
+  end;
+  Result := direcao_segura;
+end;
+
 
 
 procedure Tform_principal.configurar_fases_pre_programadas();
@@ -364,6 +419,20 @@ begin
   end;
 end;
 
+procedure Tform_principal.emitir_ordem_direcao(Jogador: TControl);
+var
+  direcao_segura: TPointF;
+begin
+  direcao_segura := calcular_direcao_segura(Jogador);
+
+  if direcao_segura.X > 0 then
+    tocar_som(CAMINHO_RECURSOS + 'direita.mp3')
+  else
+    tocar_som(CAMINHO_RECURSOS + 'esquerda.mp3');
+end;
+
+
+
 function Tform_principal.escolher_alien_aleatorio(quant_aliens: Integer): Integer;
 var
   indice: Integer;
@@ -495,38 +564,47 @@ end;
 // Tratar Colisões
 procedure Tform_principal.tratar_colisoes();
 var
-  cont1: Integer;
-  cont2: Integer;
+  cont1, cont2: Integer;
+  distancia: Single;
+  limite_proximidade: Single;
+  fl_ordem_emitida: Boolean;
 begin
   cont1 := 0;
   cont2 := 0;
-  while(cont1 < ComponentCount) do
+  limite_proximidade := 60; // Este valor pode ser ajustado conforme necessário
+
+  while (cont1 < ComponentCount) do
   begin
-
-    if((components[cont1].Tag = ID_JOGADOR) or (components[cont1].Tag = ID_TIRO_JOGADOR)) then
+    if ((components[cont1].Tag = ID_JOGADOR) or (components[cont1].Tag = ID_TIRO_JOGADOR)) then
     begin
-
-      while(cont2 < ComponentCount) do
+      while (cont2 < ComponentCount) do
       begin
-        // Achar inimigos ou seus tiros
-        if((components[cont2].Tag = ID_INIMIGO) or (components[cont2].Tag = ID_TIRO_INIMIGO)) then
+        if ((components[cont2].Tag = ID_INIMIGO) or (components[cont2].Tag = ID_TIRO_INIMIGO)) then
         begin
-          // Verifica colisão
-          if(deu_colisao(components[cont1], components[cont2]) = True) then
+          distancia := sqrt(sqr((components[cont1] as TControl).Left - (components[cont2] as TControl).Left) +
+                            sqr((components[cont1] as TControl).Top - (components[cont2] as TControl).Top));
+          if (distancia <= limite_proximidade) and not fl_ordem_emitida then
           begin
-            if((components[cont1].Tag = ID_JOGADOR) and (invencivel = False)) then
+            tmr_aviso_colisao.Enabled := true;
+            Exit;
+          end;
+
+          // Verifica colisão somente se o som já foi emitido
+          if deu_colisao(components[cont1], components[cont2]) then
+          begin
+            if (components[cont1].Tag = ID_JOGADOR) and not invencivel then
             begin
               morrer();
             end;
-            if((components[cont1].Tag = ID_TIRO_JOGADOR) and ((components[cont1] As TControl).Visible = True)) then
+            if (components[cont1].Tag = ID_TIRO_JOGADOR) and (components[cont1] as TControl).Visible then
             begin
               Inc(pontos, 100);
               atualizar_pontos();
               tocar_som(CAMINHO_RECURSOS + 'Explosao.mp3');
-              if(components[cont2].Tag = ID_INIMIGO) then
+              if (components[cont2].Tag = ID_INIMIGO) then
                 Dec(cont_aliens);
               components[cont2].Free();
-              if(components[cont1].Name = 'tiro') then
+              if (components[cont1].Name = 'tiro') then
               begin
                 tiro.Visible := False;
                 tiro.Top := 0;
@@ -542,19 +620,18 @@ begin
   end;
 end;
 
-// Utilidade que testa de várias formas se houve uma colisão entre dois componentes
+
+// procedure que testa de várias formas se houve uma colisão entre dois componentes
 function Tform_principal.deu_colisao(a, b: TComponent): Boolean;
 var
   ac, bc: TControl;
 begin
-  // Converta os componentes para o tipo apropriado
   ac := a As TControl;
   bc := b As TControl;
-  // Teste colisões tendo como base os dois componentes, um a cada vez
   Result := (testar_colisao(ac, bc) or testar_colisao(bc, ac));
 end;
 
-// Utilidade que detecta uma colisão
+// function que testa colisao
 function Tform_principal.testar_colisao(a, b: TControl): Boolean;
 begin
   // Teste se houve uma colisão ou não e retorne o resultado lógico
@@ -562,6 +639,15 @@ begin
     Result := True
   else
     Result := False;
+end;
+
+procedure Tform_principal.tmr_aviso_colisaoTimer(Sender: TObject);
+begin
+  pausa := true;
+  emitir_ordem_direcao(nave);
+  Sleep(1000);
+  pausa:=false;
+  tmr_aviso_colisao.Enabled := False;
 end;
 
 procedure Tform_principal.mover_fundo();
@@ -800,8 +886,8 @@ begin
     end;
     registrar_historico();
     avancar_fase();
-    Form2.informar_fase(fase_atual);
-    Form2.ShowModal();
+    form_janela.informar_fase(fase_atual);
+    form_janela.ShowModal();
     processamento.Enabled := True;
     pausa := False;
   end;

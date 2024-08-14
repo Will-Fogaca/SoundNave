@@ -9,7 +9,7 @@ uses
   ConstantesUnit, FaseUnit, ArquivosUnit;
 
 type
-  TForm2 = class(TForm)
+  Tform_janela = class(TForm)
     bot_manual: TButton;
     bot_historia: TButton;
     bot_pontos: TButton;
@@ -40,14 +40,14 @@ const
   ESTADO_PONTUACOES = 3;
 
 var
-  Form2: TForm2;
+  form_janela: Tform_janela;
 
 implementation
 
 {$R *.dfm}
 
 // Utilidade que recebe os dados da fase passados da janela principal
-procedure TForm2.informar_fase(dados: Fase);
+procedure Tform_janela.informar_fase(dados: Fase);
 begin
   // Receba os dados da fase
   dados_fase := dados;
@@ -60,7 +60,7 @@ begin
   end;
 end;
 
-procedure TForm2.mudar_quadro();
+procedure Tform_janela.mudar_quadro();
 begin
   dados.Clear();
   case estado of
@@ -70,32 +70,44 @@ begin
   end;
 end;
 
-procedure TForm2.bot_historiaClick(Sender: TObject);
+procedure Tform_janela.bot_historiaClick(Sender: TObject);
 begin
   estado := ESTADO_HISTORIA;
   mudar_quadro();
 end;
 
-procedure TForm2.bot_manualClick(Sender: TObject);
+procedure Tform_janela.bot_manualClick(Sender: TObject);
+var
+  fl_clicado: Boolean;
 begin
-  estado := ESTADO_MANUAL;
-  mudar_quadro();
+  if fl_clicado = false then
+  begin
+    ShowMessage('Deseja confirmar?');
+    fl_clicado := true;
+  end
+  else
+  begin
+    estado := ESTADO_MANUAL;
+    mudar_quadro();
+  end;
+
+  fl_clicado := false;
 end;
 
-procedure TForm2.bot_pontosClick(Sender: TObject);
+procedure Tform_janela.bot_pontosClick(Sender: TObject);
 begin
   estado := ESTADO_PONTUACOES;
   mudar_quadro();
 end;
 
 // Utilidade que prepara a janela quando é aberta
-procedure TForm2.FormShow(Sender: TObject);
+procedure Tform_janela.FormShow(Sender: TObject);
 begin
   mudar_quadro();
 end;
 
 // Compila os dados da fase para que sejam mostrados na tela de história
-procedure TForm2.tratar_historia(dados_fase: Fase);
+procedure Tform_janela.tratar_historia(dados_fase: Fase);
 begin
   dados.Lines.Add('HISTÓRIA');
   dados.Lines.Add('============================');
@@ -117,7 +129,7 @@ begin
 end;
 
 // Configura a janela quando a mesma é criada
-procedure TForm2.FormCreate(Sender: TObject);
+procedure Tform_janela.FormCreate(Sender: TObject);
 begin
   DoubleBuffered := True;
   pode_historiar := False;
