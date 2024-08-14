@@ -1868,13 +1868,13 @@ object form_principal: Tform_principal
     object pontuacao: TLabel
       Left = 8
       Top = 16
-      Width = 96
-      Height = 20
+      Width = 83
+      Height = 25
       Caption = 'Pontos: '
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -24
-      Font.Name = 'Courier'
+      Font.Height = 25
+      Font.Name = 'Century Gothic'
       Font.Style = []
       Font.Quality = fqNonAntialiased
       ParentFont = False
@@ -1882,13 +1882,13 @@ object form_principal: Tform_principal
     object energia: TLabel
       Left = 8
       Top = 48
-      Width = 108
-      Height = 20
+      Width = 92
+      Height = 25
       Caption = 'Energia: '
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -24
-      Font.Name = 'Courier'
+      Font.Height = 25
+      Font.Name = 'Century Gothic'
       Font.Style = []
       Font.Quality = fqNonAntialiased
       ParentFont = False
@@ -2000,6 +2000,16 @@ object form_principal: Tform_principal
     ParentFont = False
     TabOrder = 5
     Visible = False
+    object sons_direcionais: TMediaPlayer
+      Left = 344
+      Top = 64
+      Width = 253
+      Height = 30
+      DoubleBuffered = True
+      Visible = False
+      ParentDoubleBuffered = False
+      TabOrder = 0
+    end
   end
   object processamento: TTimer
     Enabled = False
@@ -2020,8 +2030,7 @@ object form_principal: Tform_principal
     Top = 16
   end
   object tmr_aviso_colisao: TTimer
-    Enabled = False
-    Interval = 4000
+    Interval = 500
     OnTimer = tmr_aviso_colisaoTimer
     Left = 288
     Top = 24

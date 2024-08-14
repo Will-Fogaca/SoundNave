@@ -21,6 +21,7 @@ type
     procedure bot_historiaClick(Sender: TObject);
     procedure bot_pontosClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure txt_apresentaClick(Sender: TObject);
   private
     estado: Integer;
     dados_fase: Fase;
@@ -126,6 +127,11 @@ begin
     dados.Lines.Add('>> Inimigos que vêm da direita ou esquerda podem atirar!');
   dados.Lines.Add('============================');
   dados.Lines.Add('Música da fase: ' + dados_fase.caminho_musica);
+end;
+
+procedure Tform_janela.txt_apresentaClick(Sender: TObject);
+begin
+
 end;
 
 // Configura a janela quando a mesma é criada

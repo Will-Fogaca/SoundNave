@@ -5,7 +5,7 @@ object form_pontuacao: Tform_pontuacao
   Caption = 'Sound Nave - Registrar Pontua'#231#227'o'
   ClientHeight = 257
   ClientWidth = 331
-  Color = clBtnFace
+  Color = clYellow
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -1299,26 +1299,26 @@ object form_pontuacao: Tform_pontuacao
   object txt_titulo_pontuacao: TLabel
     Left = 8
     Top = 63
-    Width = 184
-    Height = 18
+    Width = 210
+    Height = 21
     Caption = 'Sua pontua'#231#227'o final foi de:'
     Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlue
     Font.Height = -16
-    Font.Name = 'Arial'
+    Font.Name = 'Century Gothic'
     Font.Style = []
     ParentFont = False
   end
   object txt_nome_jogador: TLabel
     Left = 8
     Top = 136
-    Width = 130
-    Height = 18
+    Width = 146
+    Height = 21
     Caption = 'Nome do Jogador:'
     Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlue
     Font.Height = -16
-    Font.Name = 'Arial'
+    Font.Name = 'Century Gothic'
     Font.Style = []
     ParentFont = False
   end
@@ -1332,9 +1332,9 @@ object form_pontuacao: Tform_pontuacao
     Caption = '-------------------------'
     Color = clDefault
     Font.Charset = ANSI_CHARSET
-    Font.Color = clNavy
+    Font.Color = clBlue
     Font.Height = -37
-    Font.Name = 'Arial'
+    Font.Name = 'Century Gothic'
     Font.Style = [fsBold]
     ParentColor = False
     ParentFont = False
@@ -1342,13 +1342,13 @@ object form_pontuacao: Tform_pontuacao
   object txt_pont_parcial: TLabel
     Left = 8
     Top = 8
-    Width = 188
-    Height = 18
+    Width = 211
+    Height = 21
     Caption = 'Pontua'#231#227'o pr'#233'/p'#243's 3'#170' fase:'
     Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlue
     Font.Height = -16
-    Font.Name = 'Arial'
+    Font.Name = 'Century Gothic'
     Font.Style = []
     ParentFont = False
   end
@@ -1361,9 +1361,9 @@ object form_pontuacao: Tform_pontuacao
     AutoSize = False
     Caption = '-------'
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlue
     Font.Height = -16
-    Font.Name = 'Tahoma'
+    Font.Name = 'Century Gothic'
     Font.Style = [fsBold]
     ParentFont = False
   end
@@ -1376,27 +1376,39 @@ object form_pontuacao: Tform_pontuacao
     AutoSize = False
     Caption = '-----'
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlue
     Font.Height = -12
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
   end
   object bot_registrar: TButton
-    Left = 248
+    Left = 240
     Top = 224
-    Width = 75
+    Width = 83
     Height = 25
     Caption = 'Registrar'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Century Gothic'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 0
     OnClick = bot_registrarClick
   end
   object bot_cancelar: TButton
-    Left = 167
+    Left = 136
     Top = 224
-    Width = 75
+    Width = 90
     Height = 25
     Caption = 'Cancelar'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Century Gothic'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 1
     OnClick = bot_cancelarClick
   end
@@ -1404,11 +1416,11 @@ object form_pontuacao: Tform_pontuacao
     Left = 8
     Top = 160
     Width = 315
-    Height = 31
+    Height = 30
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -19
-    Font.Name = 'Tahoma'
+    Font.Name = 'Century Gothic'
     Font.Style = []
     MaxLength = 32
     ParentFont = False

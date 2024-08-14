@@ -132,7 +132,7 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="JanelinhaUnit.pas">
-            <Form>Form2</Form>
+            <Form>form_janela</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="AlienUnit.pas"/>
