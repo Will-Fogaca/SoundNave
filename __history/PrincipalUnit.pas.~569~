@@ -3,11 +3,11 @@ unit PrincipalUnit;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Imaging.pngimage,
   Vcl.StdCtrls, Vcl.MPlayer,
   ConstantesUnit, XMLManipUnit, ArquivosUnit, FaseUnit, AlienUnit, JanelinhaUnit, RegPontuacaoUnit, HistoricoUnit,
-  Winapi.ActiveX, MMSystem;
+  Winapi.ActiveX, MMSystem, System.Classes;
 
 type
   Tform_principal = class(TForm)
@@ -42,8 +42,6 @@ type
     procedure tratar_colisoes;
     function  deu_colisao(a, b: TComponent): Boolean;
     function  testar_colisao(a, b: TControl): Boolean;
-    function  calcular_direcao_segura(Jogador: TControl): String;
-    procedure emitir_ordem_direcao(Jogador: TControl);
     procedure mover_fundo;
     procedure mover_inimigos;
     procedure atualizar_pontos;
@@ -60,8 +58,8 @@ type
     procedure tocar_musica(arquivo: String);
     procedure tocar_som(arquivo: String);
     procedure tratar_tiros_inimigos;
-    function escolher_alien_aleatorio(quant_aliens: Integer): Integer;
-    function contar_tiros_inimigos: Integer;
+    function  escolher_alien_aleatorio(quant_aliens: Integer): Integer;
+    function  contar_tiros_inimigos: Integer;
     procedure mover_tiros_inimigos;
     procedure mover_nave(x, y: Integer);
     procedure inicializar_jogo;
@@ -103,7 +101,7 @@ var
 implementation
 
 uses
-  System.Types;
+  System.Types, System.Generics.Collections;
 
 {$R *.dfm}
 
@@ -165,39 +163,6 @@ begin
   invencivel := False;
   tempo_de_jogo := 0;
 end;
-
-
-function Tform_principal.calcular_direcao_segura(Jogador: TControl): String;
-var
-  i: Integer;
-  inimigos_esquerda, inimigos_direita: Integer;
-  inimigo: TControl;
-begin
-  inimigos_esquerda := 0;
-  inimigos_direita := 0;
-
-  for i := 0 to ComponentCount - 1 do
-  begin
-    if Components[i].Tag = ID_INIMIGO then
-    begin
-      inimigo := Components[i] as TControl;
-
-      if inimigo.Left < Jogador.Left then
-        Inc(inimigos_esquerda)
-      else
-        Inc(inimigos_direita);
-    end;
-  end;
-
-//  ShowMessage('Inimigos à esquerda: ' + IntToStr(inimigos_esquerda) + ', Inimigos à direita: ' + IntToStr(inimigos_direita));
-
-  if inimigos_esquerda < inimigos_direita then
-    Result := 'esquerda'
-  else
-    Result := 'direita';
-end;
-
-
 
 procedure Tform_principal.configurar_fases_pre_programadas();
 begin
@@ -406,19 +371,6 @@ begin
   end;
 end;
 
-procedure Tform_principal.emitir_ordem_direcao(Jogador: TControl);
-var
-  direcao_segura: String;
-begin
-  direcao_segura := calcular_direcao_segura(Jogador);
-
-//  if direcao_segura = 'direita' then
-//    tocar_som(CAMINHO_RECURSOS + 'direita.mp3')
-//  else
-//    tocar_som(CAMINHO_RECURSOS + 'esquerda.mp3');
-end;
-
-
 
 function Tform_principal.escolher_alien_aleatorio(quant_aliens: Integer): Integer;
 var
@@ -552,14 +504,11 @@ end;
 procedure Tform_principal.tratar_colisoes();
 var
   cont1, cont2: Integer;
-  distancia: Single;
-  limite_proximidade: Single;
   fl_ordem_emitida: Boolean;
 begin
   cont1 := 0;
   cont2 := 0;
 
-  limite_proximidade := 50;
   fl_ordem_emitida := False;
 
   while (cont1 < ComponentCount) do
@@ -570,14 +519,6 @@ begin
       begin
         if ((components[cont2].Tag = ID_INIMIGO) or (components[cont2].Tag = ID_TIRO_INIMIGO)) then
         begin
-          distancia := Abs((components[cont1] as TControl).Top - (components[cont2] as TControl).Top);
-
-          if (distancia <= limite_proximidade) and not fl_ordem_emitida then
-          begin
-            fl_ordem_emitida := True;
-            emitir_ordem_direcao(components[cont1] as TControl);  // Emitir a ordem aqui
-          end;
-
           if deu_colisao(components[cont1], components[cont2]) then
           begin
             if (components[cont1].Tag = ID_JOGADOR) and not invencivel then
@@ -631,87 +572,65 @@ end;
 
 procedure Tform_principal.tmr_aviso_colisaoTimer(Sender: TObject);
 var
-  i: Integer;
-  naveX, naveY: Single;
-  inimigoX, inimigoY: Single;
-  DistX, DistY: Single;
-  limite_proximidade: Single;
-  margem_erro: Single;
-  inimigos_esquerda, inimigos_direita: Integer;
-  som_direcao: String;
-  inimigo: TControl;
+  nave: TControl;
+  ds_som:String;
+  inimigos, tiros: TList<TControl>;
+  abs_inimigo, abs_nave: TPoint;
+  i, cont_inimigo_esquerda, cont_inimigo_direita: integer;
 begin
-  limite_proximidade := 50;
-  margem_erro := 5;
-  inimigos_esquerda := 0;
-  inimigos_direita := 0;
+  inimigos := TList<TControl>.Create;
+  tiros := TList<TControl>.Create;
+  try
+    // Inicializar os contadores
+    cont_inimigo_esquerda := 0;
+    cont_inimigo_direita := 0;
 
-  // Posição da nave
-  naveX := nave.Left + nave.Width / 2;
-  naveY := nave.Top + nave.Height / 2;
-
- procedure Tform_principal.tmr_aviso_colisaoTimer(Sender: TObject);
-var
-  i: Integer;
-  naveX, naveY: Single;
-  inimigoX, inimigoY: Single;
-  DistX, DistY: Single;
-  limite_proximidade: Single;
-  margem_erro: Single;
-  inimigos_esquerda, inimigos_direita: Integer;
-  som_direcao: String;
-  inimigo: TControl;
-begin
-  limite_proximidade := 50; // Distância vertical máxima para emitir o som
-  margem_erro := 5; // Margem de erro para considerar inimigos alinhados no eixo X
-  inimigos_esquerda := 0;
-  inimigos_direita := 0;
-
-  // Posição central da nave
-  naveX := nave.Left + nave.Width / 2;
-  naveY := nave.Top + nave.Height / 2;
-
-  // Verificar todos os inimigos dentro do formulário
-  for i := 0 to ComponentCount - 1 do
-  begin
-    if (Components[i].Tag = ID_INIMIGO) or (Components[i].Tag = ID_TIRO_INIMIGO) then
+    // Identificar os inimigos, tiros e a nave
+    for i := 0 to form_principal.ComponentCount - 1 do
     begin
-      inimigo := Components[i] as TControl;
-
-      // Posição central do inimigo
-      inimigoX := (inimigo.Left + inimigo.Width / 2);
-      inimigoY := (inimigo.Top + inimigo.Height / 2);
-
-      // Calcular a diferença em X e Y
-      DistX := inimigoX - naveX;
-      DistY := Abs(inimigoY - naveY);
-
-      // Verificar se o inimigo está no mesmo eixo X (com margem de erro) e dentro do limite de proximidade em Y
-      if (Abs(DistX) <= margem_erro) and (DistY <= limite_proximidade) then
+      if Components[i] is TControl then
       begin
-        if DistX < 0 then
-        begin
-          Inc(inimigos_esquerda);
-          OutputDebugString('Inimigo detectado à esquerda');
-        end
-        else
-        begin
-          Inc(inimigos_direita);
-          OutputDebugString('Inimigo detectado à direita');
-        end;
+        if TControl(Components[i]).Tag = ID_INIMIGO then
+          inimigos.Add(TControl(Components[i]))
+        else if TControl(Components[i]).Tag = ID_TIRO_INIMIGO then
+          tiros.Add(TControl(Components[i]))
+        else if TControl(Components[i]).Tag = ID_JOGADOR then
+          nave := TControl(Components[i]);
       end;
     end;
-  end;
 
-  // Emitir som indicando a direção segura
-  if (inimigos_esquerda > 0) or (inimigos_direita > 0) then
-  begin
-    if inimigos_esquerda > inimigos_direita then
-      som_direcao := CAMINHO_RECURSOS + 'direita.mp3'
-    else
-      som_direcao := CAMINHO_RECURSOS + 'esquerda.mp3';
+    abs_nave := nave.ClientToScreen(Point(0,0));
+    for i := 0 to inimigos.Count - 1 do
+    begin
+      abs_inimigo := inimigos[i].ClientToScreen(Point(0, 0));
 
-    try
+      // Verifica se o inimigo está visível, no mesmo eixo Y que a nave, e dentro dos limites do formulário
+      if inimigos[i].Visible and
+         (abs_inimigo.Y = abs_nave.Y) and // Verifica se o inimigo está no mesmo eixo Y que a nave
+         (abs_inimigo.X >= Self.ClientOrigin.X) and
+         (abs_inimigo.X <= Self.ClientOrigin.X + Self.ClientWidth) and
+         (abs_inimigo.Y >= Self.ClientOrigin.Y) and
+         (abs_inimigo.Y <= Self.ClientOrigin.Y + Self.ClientHeight) then
+      begin
+        if abs_inimigo.X > abs_nave.X then
+          Inc(cont_inimigo_direita)
+        else if abs_inimigo.X < abs_nave.X then
+          Inc(cont_inimigo_esquerda);
+      end
+      else
+        Exit;
+    end;
+
+    if cont_inimigo_esquerda > cont_inimigo_direita then
+    begin
+     ds_som := CAMINHO_RECURSOS + '/' + 'direita.mp3';
+    end;
+    if cont_inimigo_direita > cont_inimigo_esquerda then
+    begin
+      ds_som := CAMINHO_RECURSOS + '/' + 'esquerda.mp3';
+    end;
+
+     try
       sons_direcionais.FileName := som_direcao;
       sons_direcionais.Open();
       sons_direcionais.Play();
@@ -719,13 +638,17 @@ begin
       on E: Exception do
         OutputDebugString(PChar('Erro ao tentar tocar som: ' + E.Message));
     end;
-  end
-  else
-  begin
-    OutputDebugString('Nenhum inimigo no mesmo eixo X ou fora do limite de proximidade.');
+
+
+
+  finally
+    inimigos.Free;
+    tiros.Free;
   end;
 end;
-end;
+
+
+
 
 procedure Tform_principal.mover_fundo();
 begin
