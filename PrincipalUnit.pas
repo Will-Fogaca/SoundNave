@@ -632,6 +632,10 @@ begin
       sons_direcionais.FileName := ds_som;
       sons_direcionais.Open();
       sons_direcionais.Play();
+      pausa:=true;
+      Sleep(1000);
+      pausa:=false;
+
     except
       on E: Exception do
         OutputDebugString(PChar('Erro ao tentar tocar som: ' + E.Message));

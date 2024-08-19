@@ -2,7 +2,7 @@ object form_pontuacao: Tform_pontuacao
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
-  Caption = 'Sound Nave - Registrar Pontua'#231#227'o'
+  Caption = 'Sound Nave - Pontua'#231#227'o'
   ClientHeight = 257
   ClientWidth = 331
   Color = clYellow
