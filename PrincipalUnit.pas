@@ -74,6 +74,14 @@ type
     { Public declarations }
   end;
 
+  TSomThread = class(TThread)
+  private
+    FDS_Som: string;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(const ADS_Som: string);
+  end;
 var
   form_principal: Tform_principal;
   pausa: Boolean;
@@ -174,7 +182,7 @@ begin
   fase01.origem_esquerda := False;
   fase01.origem_direita := False;
   fase01.caminho_musica := 'Waterflame - Electroman Adventures.mp3';
-  fase01.historia := 'COMUNICADO: TU PILOTO DEFESA PLANETA NADAVER ESQUADRAO ABATIDO VOCE ULTIMA ESPERANCA BATALHA';
+  fase01.historia := 'COMUNICADO: PILOTO, VOCÊ É A ÚLTIMA LINHA DE DEFESA DO PLANETA. TODA A ESQUADRA FOI ABATIDA... VOCÊ É NOSSA ÚLTIMA ESPERANÇA DE VITÓRIA NESSA BATALHA.';
 
   // Configurando a Fase 02
   fase02 := Fase.Create;
@@ -183,7 +191,7 @@ begin
   fase02.origem_esquerda := True;
   fase02.origem_direita := True;
   fase02.caminho_musica := 'Kitsune2 - Never Want to Be a Hero.mp3';
-  fase02.historia := 'COMUNICADO: ALIENS PASSARAM ONDA + FORTE CUIDADO DEFESAS SE VIRAM AQUI FOCO FOCO FOCO';
+  fase02.historia := 'COMUNICADO: ALERTA! OS ALIENS QUEBRARAM A DEFESA E ESTÃO AINDA MAIS FORTES. MANTENHAM-SE ATENTOS E DEFENDAM COM TODAS AS FORÇAS! FOCO, FOCO, FOCO!';
 
   // Configurando a Fase 03
   fase03 := Fase.Create;
@@ -192,7 +200,8 @@ begin
   fase03.origem_esquerda := True;
   fase03.origem_direita := True;
   fase03.caminho_musica := 'TomboFry - Grayscale.mp3';
-  fase03.historia := 'COMUNICADO: NADAVER VENCER BATALHA MUITAS PERDAS NAO DEIXAR ULTIMA ONDA PASSAR!';
+  fase03.historia := 'COMUNICADO: ESTA É A BATALHA FINAL. MUITAS PERDAS FORAM SOFRIDAS, MAS NÃO PODEMOS DEIXAR A ÚLTIMA ONDA PASSAR! RESISTA E VENÇA!';
+
 
   // Inicializando dados de fase atual
   fase_atual := Fase.Create;
@@ -504,12 +513,9 @@ end;
 procedure Tform_principal.tratar_colisoes();
 var
   cont1, cont2: Integer;
-  fl_ordem_emitida: Boolean;
 begin
   cont1 := 0;
   cont2 := 0;
-
-  fl_ordem_emitida := False;
 
   while (cont1 < ComponentCount) do
   begin
@@ -573,11 +579,12 @@ end;
 procedure Tform_principal.tmr_aviso_colisaoTimer(Sender: TObject);
 var
   nave: TControl;
-  ds_som: String;
+  ds_som, ds_som_tiro: String;
   inimigos, tiros: TList<TControl>;
   abs_inimigo, abs_nave: TPoint;
   i, cont_inimigo_esquerda, cont_inimigo_direita: integer;
-  toleranciaX: Integer;
+  toleranciaX, distancia_minima: Integer;
+  inimigo_na_mira: Boolean;
 begin
   inimigos := TList<TControl>.Create;
   tiros := TList<TControl>.Create;
@@ -586,6 +593,8 @@ begin
     cont_inimigo_esquerda := 0;
     cont_inimigo_direita := 0;
     toleranciaX := 5; // Tolerância de 5 pixels para a verificação do eixo X
+    distancia_minima := 50; // Distância mínima em pixels para emitir os avisos
+    inimigo_na_mira := False;
 
     // Identificar os inimigos, tiros e a nave
     for i := 0 to form_principal.ComponentCount - 1 do
@@ -606,45 +615,60 @@ begin
     begin
       abs_inimigo := inimigos[i].ClientToScreen(Point(0, 0));
 
-      // Verifica se o inimigo está visível, no mesmo eixo X que a nave, e dentro dos limites do formulário
+      // Verifica se o inimigo está visível e no mesmo eixo X que a nave
       if inimigos[i].Visible and
-         (Abs(abs_inimigo.X - abs_nave.X) <= toleranciaX) and // Verifica se o inimigo está no mesmo eixo X que a nave
-         (abs_inimigo.Y >= Self.ClientOrigin.Y) and
-         (abs_inimigo.Y <= Self.ClientOrigin.Y + Self.ClientHeight) then
+         (Abs(abs_inimigo.X - abs_nave.X) <= toleranciaX) then
       begin
-        if abs_inimigo.Y > abs_nave.Y then
-          Inc(cont_inimigo_direita)
-        else if abs_inimigo.Y < abs_nave.Y then
-          Inc(cont_inimigo_esquerda);
+        // Verifica se o inimigo está na distância mínima da nave
+        if Abs(abs_inimigo.Y - abs_nave.Y) <= distancia_minima then
+        begin
+          inimigo_na_mira := True;
+
+          // Verifica se o inimigo está dentro dos limites do formulário
+          if (abs_inimigo.Y >= Self.ClientOrigin.Y) and
+             (abs_inimigo.Y <= Self.ClientOrigin.Y + Self.ClientHeight) then
+          begin
+            if abs_inimigo.Y > abs_nave.Y then
+              Inc(cont_inimigo_direita)
+            else if abs_inimigo.Y < abs_nave.Y then
+              Inc(cont_inimigo_esquerda);
+          end;
+        end;
       end;
     end;
 
-    if cont_inimigo_esquerda > cont_inimigo_direita then
+    // Se houver um inimigo na mesma linha da nave e dentro da distância mínima, emitir o aviso de tiro
+    if inimigo_na_mira then
+    begin
+      ds_som_tiro := CAMINHO_RECURSOS + '/' + 'tiro_iminente.mp3';
+      TSomThread.Create(ds_som_tiro);
+
+      // Aguardar um tempo curto antes de emitir o som da direção
+      Sleep(500);
+    end;
+
+    // Emitir o som da direção baseado nos contadores
+    if (cont_inimigo_esquerda > cont_inimigo_direita) then
     begin
       ds_som := CAMINHO_RECURSOS + '/' + 'direita.mp3';
     end
-    else if cont_inimigo_direita > cont_inimigo_esquerda then
+    else if (cont_inimigo_direita > cont_inimigo_esquerda) then
     begin
       ds_som := CAMINHO_RECURSOS + '/' + 'esquerda.mp3';
     end;
 
-    try
-      sons_direcionais.FileName := ds_som;
-      sons_direcionais.Open();
-      sons_direcionais.Play();
-      pausa:=true;
-      Sleep(1000);
-      pausa:=false;
+    // Emitir o som da direção, independentemente do aviso de tiro
+    if ds_som <> '' then
+      TSomThread.Create(ds_som);
 
-    except
-      on E: Exception do
-        OutputDebugString(PChar('Erro ao tentar tocar som: ' + E.Message));
-    end;
   finally
     inimigos.Free;
     tiros.Free;
   end;
 end;
+
+
+
 procedure Tform_principal.mover_fundo();
 begin
   fundo1.Top := fundo1.Top + ((movimento Div 2) * (n_fase + 1));
@@ -902,6 +926,38 @@ begin
   restaurar := False;
   salvar_estado();
   Close();
+end;
+
+{ TSomThread }
+
+constructor TSomThread.Create(const ADS_Som: string);
+begin
+  inherited Create(False); // Cria a thread e a inicia imediatamente
+  FreeOnTerminate := True; // Libera a memória automaticamente quando a thread termina
+  FDS_Som := ADS_Som;
+end;
+
+procedure TSomThread.Execute;
+begin
+  inherited;
+   try
+    TThread.Synchronize(nil,
+      procedure
+      begin
+        form_principal.sons_direcionais.FileName := FDS_Som;
+        form_principal.sons_direcionais.Open();
+        form_principal.sons_direcionais.Play();
+      end);
+    // Pausar por 1 segundo, mas sem bloquear a thread principal
+    Sleep(500);
+  except
+    on E: Exception do
+      TThread.Synchronize(nil,
+        procedure
+        begin
+          OutputDebugString(PChar('Erro ao tentar tocar som: ' + E.Message));
+        end);
+  end;
 end;
 
 end.

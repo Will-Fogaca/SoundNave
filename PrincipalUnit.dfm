@@ -2030,7 +2030,8 @@ object form_principal: Tform_principal
     Top = 16
   end
   object tmr_aviso_colisao: TTimer
-    Interval = 500
+    Enabled = False
+    Interval = 100
     OnTimer = tmr_aviso_colisaoTimer
     Left = 288
     Top = 24

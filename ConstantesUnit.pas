@@ -24,7 +24,7 @@ const
   // Constante com intervalo de ciclo de processamento
   INTERVALO_PROCESSAMENTO_MS = 25;
   // Constante com o caminho base para os recursos do jogo
-  CAMINHO_RECURSOS_PROJETO = '../../Recursos/';
+  CAMINHO_RECURSOS_PROJETO = 'Recursos/';
   CAMINHO_RECURSOS = 'Recursos/';
   // Arquivos textuais fixos
   ARQ_MANUAL = 'manual.txt';
