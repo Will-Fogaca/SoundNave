@@ -182,7 +182,7 @@ begin
   fase01.origem_esquerda := False;
   fase01.origem_direita := False;
   fase01.caminho_musica := 'Waterflame - Electroman Adventures.mp3';
-  fase01.historia := 'COMUNICADO: TU PILOTO DEFESA PLANETA NADAVER ESQUADRAO ABATIDO VOCE ULTIMA ESPERANCA BATALHA';
+  fase01.historia := 'COMUNICADO: PILOTO, VOCÊ É A ÚLTIMA LINHA DE DEFESA DO PLANETA. TODA A ESQUADRA FOI ABATIDA... VOCÊ É NOSSA ÚLTIMA ESPERANÇA DE VITÓRIA NESSA BATALHA.';
 
   // Configurando a Fase 02
   fase02 := Fase.Create;
@@ -191,7 +191,7 @@ begin
   fase02.origem_esquerda := True;
   fase02.origem_direita := True;
   fase02.caminho_musica := 'Kitsune2 - Never Want to Be a Hero.mp3';
-  fase02.historia := 'COMUNICADO: ALIENS PASSARAM ONDA + FORTE CUIDADO DEFESAS SE VIRAM AQUI FOCO FOCO FOCO';
+  fase02.historia := 'COMUNICADO: ALERTA! OS ALIENS QUEBRARAM A DEFESA E ESTÃO AINDA MAIS FORTES. MANTENHAM-SE ATENTOS E DEFENDAM COM TODAS AS FORÇAS! FOCO, FOCO, FOCO!';
 
   // Configurando a Fase 03
   fase03 := Fase.Create;
@@ -200,7 +200,8 @@ begin
   fase03.origem_esquerda := True;
   fase03.origem_direita := True;
   fase03.caminho_musica := 'TomboFry - Grayscale.mp3';
-  fase03.historia := 'COMUNICADO: NADAVER VENCER BATALHA MUITAS PERDAS NAO DEIXAR ULTIMA ONDA PASSAR!';
+  fase03.historia := 'COMUNICADO: ESTA É A BATALHA FINAL. MUITAS PERDAS FORAM SOFRIDAS, MAS NÃO PODEMOS DEIXAR A ÚLTIMA ONDA PASSAR! RESISTA E VENÇA!';
+
 
   // Inicializando dados de fase atual
   fase_atual := Fase.Create;
@@ -295,7 +296,7 @@ end;
 
 procedure Tform_principal.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if(Key = 'p') then
+  if(UpperCase(Key) = 'p') then
   begin
     pausa := not pausa;
   end;
@@ -316,7 +317,7 @@ begin
       end;
     end;
     // Mover para esquerda
-    if(Key = 'a') then
+    if(UpperCase(Key) = 'a') then
     begin
       if(nave.Left > 0) then mover_nave(nave.Left - movimento, nave.Top);
     end;
@@ -674,7 +675,7 @@ begin
   fundo2.Top := fundo2.Top + ((movimento Div 2) * (n_fase + 1));
   if(fundo1.Top > fundo1.Height) then
     fundo1.Top := -fundo1.Height;
-  if(fundo2.Top > fundo2.Height) then                                        s
+  if(fundo2.Top > fundo2.Height) then
     fundo2.Top := -fundo2.Height;
 end;
 
